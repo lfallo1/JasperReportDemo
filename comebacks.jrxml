@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
+<!-- 2017-01-29T22:01:33 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="comebacks" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0b1f8cc1-6a28-4370-999e-eacc510c21d6">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter "/>
+	<parameter name="MIN_POINT_DIFF" class="java.lang.Integer" isForPrompting="false">
+		<parameterDescription><![CDATA[MIN_POINT_DIFF]]></parameterDescription>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[with comebacks as(
+	select 
+		g.game_identifier, g.home_team_identifier, g.away_team_identifier, 
+		max(abs(s.home_team_score - s.visiting_team_score)) largest_point_diff,
+		s.time, s.quarter, s.home_team_score, s.visiting_team_score, g.home_score, g.away_score,
+		row_number() over(partition by g.game_identifier order by abs(s.home_team_score - s.visiting_team_score) desc) rnk
+	from nfl.game_scoring_play s
+	inner join nfl.game g on s.game_identifier = g.game_identifier
+	where
+		(s.home_team_score > s.visiting_team_score and g.home_score < g.away_score) or 
+		(s.home_team_score < s.visiting_team_score and g.home_score > g.away_score)
+	group by 
+		g.game_identifier, g.home_team_identifier, g.away_team_identifier, 
+		s.time, s.quarter, g.home_score, g.away_score, s.home_team_score, s.visiting_team_score
+	order by largest_point_diff desc
+)
+select * from comebacks where rnk = 1 limit 100;]]>
+	</queryString>
+	<field name="game_identifier" class="java.lang.String"/>
+	<field name="home_team_identifier" class="java.lang.String"/>
+	<field name="away_team_identifier" class="java.lang.String"/>
+	<field name="largest_point_diff" class="java.lang.Integer"/>
+	<field name="time" class="java.lang.String"/>
+	<field name="quarter" class="java.lang.Integer"/>
+	<field name="home_team_score" class="java.lang.Integer"/>
+	<field name="visiting_team_score" class="java.lang.Integer"/>
+	<field name="home_score" class="java.lang.Integer"/>
+	<field name="away_score" class="java.lang.Integer"/>
+	<field name="rnk" class="java.lang.Long"/>
+	<variable name="AveragePointDiff" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{largest_point_diff}]]></variableExpression>
+	</variable>
+	<group name="game_identifier">
+		<groupExpression><![CDATA[$F{game_identifier}]]></groupExpression>
+	</group>
+	<group name="home_team_identifier">
+		<groupExpression><![CDATA[$F{home_team_identifier}]]></groupExpression>
+	</group>
+	<group name="away_team_identifier">
+		<groupExpression><![CDATA[$F{away_team_identifier}]]></groupExpression>
+	</group>
+	<group name="largest_point_diff">
+		<groupExpression><![CDATA[$F{largest_point_diff}]]></groupExpression>
+	</group>
+	<group name="time">
+		<groupExpression><![CDATA[$F{time}]]></groupExpression>
+	</group>
+	<group name="quarter">
+		<groupExpression><![CDATA[$F{quarter}]]></groupExpression>
+	</group>
+	<group name="home_team_score">
+		<groupExpression><![CDATA[$F{home_team_score}]]></groupExpression>
+	</group>
+	<group name="visiting_team_score">
+		<groupExpression><![CDATA[$F{visiting_team_score}]]></groupExpression>
+	</group>
+	<group name="home_score">
+		<groupExpression><![CDATA[$F{home_score}]]></groupExpression>
+	</group>
+	<group name="away_score">
+		<groupExpression><![CDATA[$F{away_score}]]></groupExpression>
+	</group>
+	<group name="rnk">
+		<groupExpression><![CDATA[$F{rnk}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="55" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="31" splitType="Stretch">
+			<textField>
+				<reportElement x="300" y="0" width="170" height="30" uuid="ca89801e-554f-4711-9247-6a7e4fc663a4"/>
+				<textFieldExpression><![CDATA["Away team identifier"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="470" y="0" width="100" height="30" uuid="ad6e0b43-a1be-4521-90bf-3d08e721b409"/>
+				<textFieldExpression><![CDATA["Deficit"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="0" width="100" height="30" uuid="e18e4e4e-492b-48dd-814c-9a66aa0860cd"/>
+				<textFieldExpression><![CDATA["Final score"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="100" height="30" uuid="96b32800-7c8e-4ead-a774-d555e8f3238b"/>
+				<textFieldExpression><![CDATA["Game identifier"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="0" width="100" height="30" uuid="230cc620-92e2-42d0-97d5-67f88d1a3ba5"/>
+				<textFieldExpression><![CDATA["Home team identifier"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="31" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="30" uuid="77cc04ff-cd70-4ead-8a86-46a8b882a1a4"/>
+				<textFieldExpression><![CDATA[$F{game_identifier}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="0" width="100" height="30" uuid="967309c2-e5a6-4615-a4f1-09700df25ef0"/>
+				<textFieldExpression><![CDATA[$F{home_team_score} + "-" + $F{visiting_team_score}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="0" width="170" height="30" uuid="13c50d0c-d71c-45df-b843-c13fb13569ea"/>
+				<textFieldExpression><![CDATA[$F{away_team_identifier}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="0" width="100" height="30" uuid="f6a14e1e-87b4-4a08-8207-f27c13e549e7"/>
+				<textFieldExpression><![CDATA[$F{home_team_identifier}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="470" y="0" width="100" height="30" uuid="a9c64272-33e8-461c-acf7-99148b0d5db5"/>
+				<textFieldExpression><![CDATA[$F{largest_point_diff}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch">
+			<textField>
+				<reportElement x="230" y="12" width="100" height="30" uuid="b7020ce4-a205-440d-a015-19cc2fbd06e3"/>
+				<textFieldExpression><![CDATA["Average deficit: " + $V{AveragePointDiff} / $V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>
